@@ -1,0 +1,232 @@
+---
+title: "EDA-challenge"
+format: html
+author: Qiaoyun Ai
+---
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+```
+
+## load dataset
+
+```{r}
+f <- "https://raw.githubusercontent.com/difiore/ada-datasets/refs/heads/main/data-wrangling.csv"
+d <- read_csv(f, col_names = TRUE)
+head (d)
+names(d)
+```
+
+## create new variables
+
+```{r}
+d$BSD <- d$Body_mass_male_mean/d$Body_mass_female_mean
+d$sex_ratio <- d$AdultFemale/d$AdultMales
+home_range_radius <- sqrt(d$HomeRange_km2/pi)
+home_range_diameter <- 2*home_range_radius
+d$DI <- d$DayLength_km/home_range_diameter
+summary(d[, c("BSD", "sex_ratio", "DI")])
+```
+
+## 4. Plot the relationship between day range length (y axis) and time spent moving (x axis)
+
+```{r}
+d_clean <- d %>%
+  select(Move, DayLength_km) %>%
+  drop_na()
+p <- ggplot(data = d_clean, aes(x = Move, y = DayLength_km))
+p <- p + xlab("Move") + ylab("DayLength_km")
+p <- p + geom_point(na.rm = TRUE)
+p <- p + geom_smooth(method = "lm", fullrange = FALSE, na.rm = TRUE)
+p <- p + theme(legend.position = "none", legend.title = element_blank())
+p
+```
+
+```{r}
+d_clean <- d %>%
+  select(Move, DayLength_km) %>%
+  drop_na()
+p <- ggplot(data = d_clean, aes(x = log(Move), y = log(DayLength_km)))
+ p <- p + xlab("log(Move)") + ylab("log(DayLength_km)")
+ p <- p + geom_point(na.rm = TRUE)
+ p <- p + geom_smooth(method = "lm", fullrange = FALSE, na.rm = TRUE)
+ p <- p + theme(legend.position = "none", legend.title = element_blank())
+ p
+```
+
+```{r}
+p <- ggplot(data = d, aes(x = Move, y = DayLength_km, color = factor(Family)))
+p <- p + xlab("Move") + ylab("DayLength_km")
+p <- p + geom_point(na.rm = TRUE)
+p <- p + facet_wrap(~Family, ncol = 4)
+p <- p + geom_smooth(method = "lm", fullrange = FALSE, na.rm = TRUE)
+p <- p + theme(legend.position = "none", legend.title = element_blank())
+p
+```
+
+```{r}
+p <- ggplot(data = d, aes(x = log(Move), y = log(DayLength_km), color = factor(Family)))
+p <- p + xlab("log(Move)") + ylab("log(DayLength_km)")
+p <- p + geom_point(na.rm = TRUE)
+p <- p + facet_wrap(~Family, ncol = 4)
+p <- p + geom_smooth(method = "lm", fullrange = FALSE, na.rm = TRUE)
+p <- p + theme(legend.position = "none", legend.title = element_blank())
+p
+```
+
+Q1: Do species that spend more time moving travel farther overall?
+
+Yes.
+
+Q2: How about within any particular primate family?
+
+The relationship is weaker and more variable within family
+
+Q3: Should you transform either of these variables?
+
+Yes. The original data span a wide range of values, and log transformation reveals a more linear relationship.
+
+## 5. Plot the relationship between day range length (y axis) and group size (x axis)
+
+```{r}
+d_clean <- d %>%
+  select(MeanGroupSize, DayLength_km) %>%
+  drop_na() 
+p <- ggplot(data = d_clean, aes(x = MeanGroupSize, y = DayLength_km))
+ p <- p + xlab("MeanGroupSize") + ylab("DayLength_km")
+ p <- p + geom_point(na.rm = TRUE)
+ p <- p + geom_smooth(method = "lm", fullrange = FALSE, na.rm = TRUE)
+ p <- p + theme(legend.position = "none", legend.title = element_blank())
+ p
+```
+
+```{r}
+d_clean <- d %>%
+  select(MeanGroupSize, DayLength_km) %>%
+  drop_na() 
+p <- ggplot(data = d_clean, aes(x = log(MeanGroupSize), y = log(DayLength_km)))
+ p <- p + xlab("log(MeanGroupSize)") + ylab("log(DayLength_km)")
+ p <- p + geom_point(na.rm = TRUE)
+ p <- p + geom_smooth(method = "lm", fullrange = FALSE, na.rm = TRUE)
+ p <- p + theme(legend.position = "none", legend.title = element_blank())
+ p
+```
+
+```{r}
+p <- ggplot(data = d, aes(x = MeanGroupSize, y = DayLength_km, color = factor(Family)))
+p <- p + xlab("MeanGroupSize") + ylab("DayLength_km")
+p <- p + geom_point(na.rm = TRUE)
+p <- p + facet_wrap(~Family, ncol = 4)
+p <- p + geom_smooth(method = "lm", fullrange = FALSE, na.rm = TRUE)
+p <- p + theme(legend.position = "none", legend.title = element_blank())
+p
+```
+
+```{r}
+p <- ggplot(data = d, aes(x = log(MeanGroupSize), y = log(DayLength_km), color = factor(Family)))
+p <- p + xlab("log(MeanGroupSize)") + ylab("log(DayLength_km)")
+p <- p + geom_point(na.rm = TRUE)
+p <- p + facet_wrap(~Family, ncol = 4)
+p <- p + geom_smooth(method = "lm", fullrange = FALSE, na.rm = TRUE)
+p <- p + theme(legend.position = "none", legend.title = element_blank())
+p
+```
+
+Q1: Do species that live in larger groups travel farther overall?
+
+Yes.
+
+Q2: How about within any particular primate family?
+
+The relationship is weaker and more variable within family
+
+Q3: Should you transform either of these variables?
+
+Yes. The original data span a wide range of values, and log transformation reveals a more linear relationship.
+
+## 6. Plot the relationship between canine size dimorphism (y axis) and body size dimorphism (x axis)
+
+```{r}
+d_clean <- d %>%
+  select(BSD, Canine_Dimorphism) %>%
+  drop_na() 
+p <- ggplot(data = d_clean, aes(x = log(BSD), y = log(Canine_Dimorphism)))
+ p <- p + xlab("log(BSD)") + ylab("log(Canine_Dimorphism)")
+ p <- p + geom_point(na.rm = TRUE)
+ p <- p + geom_smooth(method = "lm", fullrange = FALSE, na.rm = TRUE)
+ p <- p + theme(legend.position = "none", legend.title = element_blank())
+ p
+```
+
+```{r}
+p <- ggplot(data = d, aes(x = log(BSD), y = log(Canine_Dimorphism), color = factor(Family)))
+p <- p + xlab("log(BSD)") + ylab("log(Canine_Dimorphism)")
+p <- p + geom_point(na.rm = TRUE)
+p <- p + facet_wrap(~Family, ncol = 4)
+p <- p + geom_smooth(method = "lm", fullrange = FALSE, na.rm = TRUE)
+p <- p + theme(legend.position = "none", legend.title = element_blank())
+p
+```
+
+Q1: Do taxa with greater size dimorphism also show greater canine dimorphism?
+
+Yes. Taxa with greater body size dimorphism generally show greater canine dimorphism, though the strength of this relationship varies across families.
+
+## 7. Create a new variable and do boxplots of group size for species
+
+```{r}
+d <- d %>%
+  mutate(
+    diet_strategy = case_when(
+      Fruit >= 50 ~ "frugivore", Leaves >= 50 ~ "folivore",
+      Fruit < 50 & Leaves < 50 ~ "omnivore", TRUE ~ NA
+    )
+  )
+head(d$diet_strategy)
+ggplot(
+  d %>% filter(!is.na(diet_strategy)),
+  aes(x = diet_strategy, y = log(MeanGroupSize))
+  ) +
+  geom_boxplot(na.rm = TRUE) +
+  geom_smooth(method = "lm", fullrange = FALSE, na.rm = TRUE) +
+  theme(legend.position = "none", legend.title = element_blank())
+```
+
+```{r}
+d <- d %>%
+  mutate(
+    diet_strategy = case_when(
+      Fruit >= 50 ~ "frugivore", Leaves >= 50 ~ "folivore",
+      Fruit < 50 & Leaves < 50 ~ "omnivore", TRUE ~ NA
+    )
+  )
+head(d$diet_strategy)
+ggplot(
+  d %>% filter(!is.na(diet_strategy)),
+  aes(x = diet_strategy, y = log(MeanGroupSize), color = factor(Family))) +
+  geom_boxplot(na.rm = TRUE) +
+  facet_wrap(~Family, ncol = 4) +
+  geom_smooth(method = "lm", fullrange = FALSE, na.rm = TRUE) +
+  theme(legend.position = "none", legend.title = element_blank())
+```
+
+Q1: Do frugivores live in larger groups than folivores?
+
+No. Frugivores do not live in larger groups than folivores overall, and the pattern varies by family.
+
+## 8. Family-Level Patterns in Primate Brain and Body Size
+
+```{r}
+d %>%
+  mutate(Binomial = paste(Genus, Species)) %>%
+  select(Binomial, Family, Brain_Size_Species_Mean, Body_mass_male_mean) %>%
+  group_by(Family) %>%
+  summarise(
+    mean_brain_size = mean(Brain_Size_Species_Mean, na.rm = TRUE),
+    mean_body_mass_male = mean(Body_mass_male_mean, na.rm = TRUE)
+  ) %>%
+  arrange(mean_brain_size) %>%
+  print()
+```
